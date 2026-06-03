@@ -1,23 +1,19 @@
 import uuid
-from typing import List
+
 from ...core.database import db
+from ..reference.service import ReferenceService
 from .models import Order, OrderItem, OrderStatus
 from .status_machine import StatusMachine
-from ..reference.service import ReferenceService
 
 
 class OrderService:
-
     _call_counter = 0
 
     @staticmethod
     def create_order(client_id: str, car_info: str) -> Order:
         order_id = str(uuid.uuid4())[:8]
         order = Order(
-            id=order_id,
-            number=f"ЗН-{order_id}",
-            client_id=client_id,
-            car_info=car_info
+            id=order_id, number=f"ЗН-{order_id}", client_id=client_id, car_info=car_info
         )
         db.orders[order_id] = order
         return order
@@ -45,7 +41,7 @@ class OrderService:
 
         item = OrderItem("work", work_id, work.name, hours, work.price_per_hour)
         print(f"[DEBUG] item.total = {item.total}")
-        
+
         order.items.append(item)
         print(f"[DEBUG] items count AFTER append: {len(order.items)}")
 
@@ -60,7 +56,7 @@ class OrderService:
         if not order:
             return None
 
-        # проверка quantity <= 0 
+        # проверка quantity <= 0
         if quantity <= 0:
             return order
 
@@ -98,4 +94,5 @@ class OrderService:
     @staticmethod
     def get_all_orders():
         from ...core.database import db
+
         return list(db.orders.values())

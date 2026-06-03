@@ -1,0 +1,37 @@
+[tool.black]
+line-length = 88
+target-version = ['py312']
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+  | migrations
+  | alembic
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = ["migrations", "alembic"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008", "C901", "PLR0913", "PLR0912", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*.py" = ["E402"]  # Игнорируем E402 в тестовых файлах
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

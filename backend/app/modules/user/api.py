@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
-from .schemas import UserRegister, UserLogin, UserResponse
-from .service import UserService
+from fastapi import APIRouter, Depends, HTTPException
+
 from ...core.dependencies import get_current_user
+from .schemas import UserLogin, UserRegister, UserResponse
+from .service import UserService
 
 router = APIRouter(prefix="/api/v1/user", tags=["user"])
 
@@ -13,14 +14,10 @@ def register(data: UserRegister):
         phone=data.phone,
         email=data.email,
         password=data.password,
-        role=data.role
+        role=data.role,
     )
     return UserResponse(
-        id=user.id,
-        name=user.name,
-        phone=user.phone,
-        email=user.email,
-        role=user.role
+        id=user.id, name=user.name, phone=user.phone, email=user.email, role=user.role
     )
 
 
@@ -39,5 +36,5 @@ def get_me(current_user=Depends(get_current_user)):
         name=current_user.name,
         phone=current_user.phone,
         email=current_user.email,
-        role=current_user.role
+        role=current_user.role,
     )

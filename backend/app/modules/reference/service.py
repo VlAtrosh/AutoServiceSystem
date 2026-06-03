@@ -1,8 +1,7 @@
-from .models import Work, Part
+from .models import Part, Work
 
 
 class ReferenceService:
-
     _works = {
         "w1": Work("w1", "Oil change", 1200),
         "w2": Work("w2", "Brake pads replacement", 1500),

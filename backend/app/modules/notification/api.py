@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from .service import NotificationService
 
 router = APIRouter(prefix="/api/v1/notification", tags=["notification"])

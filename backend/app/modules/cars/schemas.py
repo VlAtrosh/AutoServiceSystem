@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 
 class CarCreate(BaseModel):
@@ -12,12 +11,12 @@ class CarCreate(BaseModel):
 
 
 class CarUpdate(BaseModel):
-    brand: Optional[str] = None
-    model: Optional[str] = None
-    year: Optional[int] = None
-    license_plate: Optional[str] = None
-    vin: Optional[str] = None
-    color: Optional[str] = None
+    brand: str | None = None
+    model: str | None = None
+    year: int | None = None
+    license_plate: str | None = None
+    vin: str | None = None
+    color: str | None = None
 
 
 class CarResponse(BaseModel):

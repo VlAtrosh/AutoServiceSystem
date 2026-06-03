@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 class Car:
     def __init__(
         self,
@@ -11,7 +8,7 @@ class Car:
         year: int,
         license_plate: str,
         vin: str,
-        color: str
+        color: str,
     ):
         self.id = id
         self.client_id = client_id

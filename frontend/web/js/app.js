@@ -1,13 +1,80 @@
-// Показываем окно входа, если нет сохранённого токена
-if (!localStorage.getItem('auth_token')) {
+// ========== ГЛОБАЛЬНАЯ ФУНКЦИЯ ВХОДА (вызывается из HTML) ==========
+window.manualLogin = async function() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
+    
+    if (errorDiv) errorDiv.textContent = '';
+    
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/user/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('auth_token', data.access_token);
+            
+            const modal = document.getElementById('login-modal');
+            if (modal) modal.style.display = 'none';
+            
+            await loadCurrentUser();
+            await loadOrders();
+            setupNavigation();
+            setupUserProfile();
+            
+            alert('Вход выполнен успешно!');
+        } else {
+            const error = await res.json();
+            if (errorDiv) errorDiv.textContent = error.detail || 'Неверный email или пароль';
+        }
+    } catch (err) {
+        console.error('Ошибка входа:', err);
+        if (errorDiv) errorDiv.textContent = 'Ошибка подключения к серверу';
+    }
+};
+
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+function showLoginModal() {
     const modal = document.getElementById('login-modal');
     if (modal) modal.style.display = 'flex';
 }
 
-// Текущий пользователь (загружается после авторизации)
+function hideLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function checkTokenValidity() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        showLoginModal();
+        return false;
+    }
+    
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/user/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            hideLoginModal();
+            return true;
+        } else {
+            localStorage.removeItem('auth_token');
+            showLoginModal();
+            return false;
+        }
+    } catch (error) {
+        console.error('Ошибка проверки токена:', error);
+        showLoginModal();
+        return false;
+    }
+}
+
 let currentUser = null;
 
-// Загрузка данных текущего пользователя с сервера
 async function loadCurrentUser() {
     const token = localStorage.getItem('auth_token');
     if (!token) return null;
@@ -17,7 +84,6 @@ async function loadCurrentUser() {
         });
         if (res.ok) {
             currentUser = await res.json();
-            // Отображаем имя, роль и ID пользователя в интерфейсе
             const userNameEl = document.getElementById('user-name');
             const userRoleEl = document.getElementById('user-role');
             const userIdEl = document.getElementById('user-id');
@@ -30,17 +96,13 @@ async function loadCurrentUser() {
     return null;
 }
 
-// Выход из системы
 function logout() {
     localStorage.removeItem('auth_token');
     alert('Вы вышли из системы');
     location.reload();
 }
 
-
-// ========== ЗАКАЗ-НАРЯДЫ ==========
-
-// Создание нового заказа (модальное окно)
+// ========== МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА ==========
 function showCreateOrderModal() {
     const token = localStorage.getItem('auth_token');
     if (!token) {
@@ -50,7 +112,6 @@ function showCreateOrderModal() {
     
     const userId = currentUser?.id || 'client1';
     
-    // Создаём модальное окно динамически
     const modal = document.createElement('div');
     modal.id = 'create-order-modal';
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:10001;';
@@ -73,9 +134,9 @@ function showCreateOrderModal() {
     `;
     document.body.appendChild(modal);
     
-    // Обработчик сохранения заказа
     document.getElementById('submit-order-btn').onclick = async () => {
         const carInfo = document.getElementById('order-car').value.trim();
+        
         if (!carInfo) {
             alert('Введите автомобиль');
             return;
@@ -87,6 +148,7 @@ function showCreateOrderModal() {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ client_id: userId, car_info: carInfo })
             });
+            
             if (res.ok) {
                 alert('✅ Заказ создан!');
                 modal.remove();
@@ -103,12 +165,14 @@ function showCreateOrderModal() {
     document.getElementById('cancel-order-btn').onclick = () => modal.remove();
 }
 
-// Загрузка списка всех заказов
+// ========== ЗАГРУЗКА ЗАКАЗОВ ==========
 async function loadOrders() {
     const token = localStorage.getItem('auth_token');
     if (!token) return;
     
     const content = document.getElementById('content-area');
+    if (!content) return;
+    
     content.innerHTML = '<div style="padding:40px;text-align:center;">Загрузка заказов...</div>';
     
     try {
@@ -122,7 +186,6 @@ async function loadOrders() {
             return;
         }
         
-        // Карточки заказов с цветовой индикацией статусов
         content.innerHTML = `<div class="cards-grid">${orders.map(order => `
             <div class="order-card">
                 <div class="order-header">
@@ -138,8 +201,7 @@ async function loadOrders() {
     }
 }
 
-
-// ========== ЗАПИСЬ НА РЕМОНТ (ФОРМА) ==========
+// ========== ЗАПИСЬ НА РЕМОНТ ==========
 function showAppointmentForm() {
     document.getElementById('page-title').textContent = 'Запись на ремонт';
     const content = document.getElementById('content-area');
@@ -185,8 +247,7 @@ function showAppointmentForm() {
     });
 }
 
-
-// ========== КЛИЕНТЫ (СТАТИСТИКА ИЗ ЗАКАЗОВ) ==========
+// ========== КЛИЕНТЫ ==========
 async function loadClients() {
     document.getElementById('page-title').textContent = 'Клиенты';
     const content = document.getElementById('content-area');
@@ -199,8 +260,6 @@ async function loadClients() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const orders = await res.json();
-        
-        // Группируем заказы по клиентам
         const clients = {};
         orders.forEach(o => { clients[o.client_id] = (clients[o.client_id] || 0) + 1; });
         
@@ -208,7 +267,6 @@ async function loadClients() {
             content.innerHTML = '<div style="padding:40px;text-align:center;">Нет клиентов</div>';
             return;
         }
-        
         content.innerHTML = `<div class="cards-grid">${Object.entries(clients).map(([id, count]) => `
             <div class="order-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -222,8 +280,7 @@ async function loadClients() {
     }
 }
 
-
-// ========== ИСПОЛНИТЕЛИ (ЗАГЛУШКА) ==========
+// ========== ИСПОЛНИТЕЛИ ==========
 async function loadWorkers() {
     document.getElementById('page-title').textContent = 'Исполнители';
     const content = document.getElementById('content-area');
@@ -231,7 +288,6 @@ async function loadWorkers() {
     const token = localStorage.getItem('auth_token');
     if (!token) return;
     
-    // Временные тестовые данные (заглушка)
     content.innerHTML = `
         <div class="cards-grid">
             <div class="order-card">
@@ -256,8 +312,7 @@ async function loadWorkers() {
     `;
 }
 
-
-// ========== СПРАВОЧНИКИ (РАБОТЫ И ЗАПЧАСТИ) ==========
+// ========== СПРАВОЧНИК РАБОТ ==========
 async function loadWorksReference() {
     document.getElementById('page-title').textContent = 'Справочник работ';
     const content = document.getElementById('content-area');
@@ -290,6 +345,7 @@ async function loadWorksReference() {
     }
 }
 
+// ========== СПРАВОЧНИК ЗАПЧАСТЕЙ ==========
 async function loadPartsReference() {
     document.getElementById('page-title').textContent = 'Справочник запчастей';
     const content = document.getElementById('content-area');
@@ -322,8 +378,7 @@ async function loadPartsReference() {
     }
 }
 
-
-// ========== АВТОМОБИЛИ (CRUD) ==========
+// ========== АВТОМОБИЛИ ==========
 async function loadCars() {
     document.getElementById('page-title').textContent = 'Автомобили';
     const content = document.getElementById('content-area');
@@ -377,7 +432,6 @@ async function loadCars() {
     }
 }
 
-// Форма добавления автомобиля
 function showAddCarForm() {
     const content = document.getElementById('content-area');
     content.innerHTML = `
@@ -399,7 +453,6 @@ function showAddCarForm() {
     `;
 }
 
-// Сохранение нового автомобиля
 async function saveCar() {
     const token = localStorage.getItem('auth_token');
     const carData = {
@@ -507,7 +560,6 @@ async function deleteCar(carId) {
     }
 }
 
-
 // ========== ОТЧЁТЫ ==========
 function loadReports() {
     document.getElementById('page-title').textContent = 'Отчёты';
@@ -560,13 +612,11 @@ function loadReports() {
     });
 }
 
-
-// ========== CRM ДОСКА (KANBAN) ==========
+// ========== CRM ДОСКА ==========
 function loadCRM() {
     document.getElementById('page-title').textContent = 'CRM - Управление клиентами';
     const content = document.getElementById('content-area');
     
-    // Колонки Kanban-доски
     const columns = [
         { name: 'Позвонить', color: '#fef3c7', textColor: '#d97706', icon: '📞' },
         { name: 'Запись', color: '#dbeafe', textColor: '#1e40af', icon: '📅' },
@@ -575,7 +625,6 @@ function loadCRM() {
         { name: 'Отказ', color: '#fee2e2', textColor: '#dc2626', icon: '❌' }
     ];
     
-    // Тестовые данные CRM
     const cards = {
         'Позвонить': [
             { id: 1, name: 'Иван Петров', car: 'BMW X5', phone: '+7 999 123-45-67', date: '2026-05-10' },
@@ -596,12 +645,13 @@ function loadCRM() {
     };
     
     let html = `<div class="crm-board">`;
+    
     columns.forEach(col => {
         const columnCards = cards[col.name] || [];
         html += `
             <div class="crm-column">
                 <div class="crm-column-header" style="background: ${col.color}; color: ${col.textColor};">
-                    ${col.icon} ${col.name} <span style="background:rgba(0,0,0,0.1); padding:2px 8px; border-radius:20px;">${columnCards.length}</span>
+                    ${col.icon} ${col.name} <span style="font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 20px;">${columnCards.length}</span>
                 </div>
                 <div class="crm-cards">
                     ${columnCards.map(card => `
@@ -615,16 +665,16 @@ function loadCRM() {
             </div>
         `;
     });
+    
     html += `</div>`;
     content.innerHTML = html;
 }
 
-
 // ========== НАВИГАЦИЯ ==========
 function setupNavigation() {
-    // Обработка обычных пунктов меню
     document.querySelectorAll('.nav-item:not(.has-submenu)').forEach(item => {
-        item.addEventListener('click', (e) => {
+        item.removeEventListener('click', item._listener);
+        const handler = (e) => {
             e.preventDefault();
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
@@ -635,12 +685,14 @@ function setupNavigation() {
             else if (page === 'cars') loadCars();
             else if (page === 'reports') loadReports();
             else loadOrders();
-        });
+        };
+        item._listener = handler;
+        item.addEventListener('click', handler);
     });
     
-    // Обработка пунктов выпадающего подменю
     document.querySelectorAll('.submenu-item').forEach(item => {
-        item.addEventListener('click', (e) => {
+        item.removeEventListener('click', item._listener);
+        const handler = (e) => {
             e.preventDefault();
             const page = item.dataset.page;
             
@@ -657,21 +709,22 @@ function setupNavigation() {
             else if (page === 'workers') loadWorkers();
             else if (page === 'works-ref') loadWorksReference();
             else if (page === 'parts-ref') loadPartsReference();
-        });
+        };
+        item._listener = handler;
+        item.addEventListener('click', handler);
     });
 }
 
-
-// ========== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ (ВЫПАДАЮЩЕЕ МЕНЮ) ==========
+// ========== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ==========
 function setupUserProfile() {
     const userDropdown = document.getElementById('user-dropdown');
     const userCard = document.getElementById('user-profile-btn');
     
-    // Открытие/закрытие меню при наведении
     if (userCard && userDropdown) {
         userCard.addEventListener('mouseenter', () => {
             userDropdown.style.display = 'flex';
         });
+        
         userCard.addEventListener('mouseleave', () => {
             setTimeout(() => {
                 if (!userDropdown.matches(':hover')) {
@@ -679,15 +732,16 @@ function setupUserProfile() {
                 }
             }, 100);
         });
+        
         userDropdown.addEventListener('mouseleave', () => {
             userDropdown.style.display = 'none';
         });
+        
         userDropdown.addEventListener('mouseenter', () => {
             userDropdown.style.display = 'flex';
         });
     }
     
-    // Пункт "Профиль" — показывает информацию о пользователе
     const profileItem = document.getElementById('dropdown-profile');
     if (profileItem) {
         profileItem.onclick = () => {
@@ -699,7 +753,6 @@ function setupUserProfile() {
         };
     }
     
-    // Пункт "Выход"
     const logoutItem = document.getElementById('dropdown-logout');
     if (logoutItem) {
         logoutItem.onclick = () => {
@@ -708,56 +761,27 @@ function setupUserProfile() {
     }
 }
 
-
-// ========== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ==========
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadCurrentUser();
-    setupNavigation();
-    setupUserProfile();
+    const isValid = await checkTokenValidity();
     
-    // Кнопка создания заказа
-    const createBtn = document.getElementById('create-order-btn');
-    if (createBtn) {
-        createBtn.onclick = () => {
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                alert('Сначала авторизуйтесь');
-                return;
-            }
-            showCreateOrderModal();
-        };
-    }
-    
-    // Кнопка входа
-    const loginBtn = document.getElementById('do-login');
-    if (loginBtn) {
-        loginBtn.onclick = async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            try {
-                const res = await fetch('http://localhost:8000/api/v1/user/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    localStorage.setItem('auth_token', data.access_token);
-                    alert('Вход выполнен');
-                    location.reload();
-                } else {
-                    alert('Ошибка входа');
+    if (isValid) {
+        await loadCurrentUser();
+        setupNavigation();
+        setupUserProfile();
+        
+        const createBtn = document.getElementById('create-order-btn');
+        if (createBtn) {
+            createBtn.onclick = () => {
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    alert('Сначала авторизуйтесь');
+                    return;
                 }
-            } catch {
-                alert('Ошибка подключения');
-            }
-        };
-    }
-    
-    // Если есть токен — скрываем модалку входа и загружаем заказы
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-        document.getElementById('login-modal').style.display = 'none';
+                showCreateOrderModal();
+            };
+        }
+        
         await loadOrders();
     }
 });

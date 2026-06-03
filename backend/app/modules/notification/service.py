@@ -1,17 +1,16 @@
-from ..user.service import UserService
-from ..order.models import OrderStatus
 from ...config import config
+from ..order.models import OrderStatus
+from ..user.service import UserService
 
 
 class NotificationService:
-
     @staticmethod
     def send_sms(phone: str, message: str) -> bool:
         # TEST режим: только имитация
-        if config.ENV == 'test':
+        if config.ENV == "test":
             print(f"[TEST MODE] SMS to {phone}: {message}")
             return True
-        
+
         # Обычная отправка
         print(f"[SMS] -> {phone}: {message}")
         return True
@@ -24,11 +23,13 @@ class NotificationService:
 
         # DEBUG режим: дополнительное логирование
         if config.DEBUG:
-            print(f"[DEBUG] send_status_notification: client={client_id}, order={order_number}, status={status}")
+            print(
+                f"[DEBUG] send_status_notification: client={client_id}, order={order_number}, status={status}"
+            )
 
         status_names = {
             OrderStatus.READY.value: "ready for pickup",
-            OrderStatus.WAITING_APPROVAL.value: "waiting for approval of additional work"
+            OrderStatus.WAITING_APPROVAL.value: "waiting for approval of additional work",
         }
 
         message = f"Your order {order_number} {status_names.get(status.value if hasattr(status, 'value') else status, status)}"
@@ -42,10 +43,10 @@ class NotificationService:
 
         link = f"https://auto-service.ru/approve/{order_id}"
         message = f"To approve additional work for order {order_number} follow the link: {link}"
-        
+
         # DEBUG режим: показываем ссылку в консоли
         if config.DEBUG:
             print(f"[DEBUG] Approval link: {link}")
-        
+
         NotificationService.send_sms(client.phone, message)
         return link

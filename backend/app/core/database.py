@@ -1,5 +1,6 @@
-from ..modules.user.models import User, UserRole
 from ..modules.order.models import Order, OrderStatus
+from ..modules.user.models import User, UserRole
+
 
 class Database:
     def __init__(self):
@@ -16,7 +17,7 @@ class Database:
             phone="+79123456789",
             email="test@mail.ru",
             role=UserRole.CLIENT,
-            password_hash="202cb962ac59075b964b07152d234b70"
+            password_hash="202cb962ac59075b964b07152d234b70",
         )
         self.users["client1"] = test_user
 
@@ -24,7 +25,7 @@ class Database:
             id="order1",
             number="ЗН-001",
             client_id="client1",
-            car_info="Toyota Camry 2020"
+            car_info="Toyota Camry 2020",
         )
         test_order.status = OrderStatus.COMPLETED
         test_order.total = 15000
@@ -36,7 +37,7 @@ class Database:
             phone="+79123456788",
             email="mechanic@mail.ru",
             role=UserRole.MECHANIC,
-            password_hash="202cb962ac59075b964b07152d234b70"
+            password_hash="202cb962ac59075b964b07152d234b70",
         )
         self.users["mechanic1"] = test_mechanic
 

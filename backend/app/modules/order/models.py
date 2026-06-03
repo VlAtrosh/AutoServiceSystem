@@ -1,6 +1,5 @@
-from enum import Enum
-from typing import List, Optional
 from datetime import datetime
+from enum import Enum
 
 
 class OrderStatus(str, Enum):
@@ -13,7 +12,9 @@ class OrderStatus(str, Enum):
 
 
 class OrderItem:
-    def __init__(self, item_type: str, id: str, name: str, quantity: float, price: float):
+    def __init__(
+        self, item_type: str, id: str, name: str, quantity: float, price: float
+    ):
         self.type = item_type
         self.id = id
         self.name = name
@@ -29,8 +30,8 @@ class Order:
         self.client_id = client_id
         self.car_info = car_info
         self.status = OrderStatus.ACCEPTED
-        self.items: List[OrderItem] = []
+        self.items: list[OrderItem] = []
         self.mechanic_id = ""
         self.created_at = datetime.now()
-        self.completed_at: Optional[datetime] = None
+        self.completed_at: datetime | None = None
         self.total = 0.0

@@ -23,80 +23,169 @@ FastAPI — это современный и быстрый фреймворк �
 ### Требования
 
 - Python 3.8+
+- Docker (рекомендуется)
 - Git
+- Make (для Linux/macOS) или Git Bash (для Windows)
 
-### Установка
+### Через Docker (рекомендуемый способ)
 
-1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/VlAtrosh/car-service.git
-cd auto_service
+# Клонирование репозитория
+git clone https://github.com/VlAtrosh/AutoServiceSystem.git
+cd AutoServiceSystem
 
+# Запуск всех сервисов
+docker compose up --build
+```
+## После запуска:
 
-# Windows
+- Frontend: http://localhost
+
+- Backend API: http://localhost:8000
+
+- Swagger документация: http://localhost:8000/docs
+
+Остановка:
+```
+docker compose down
+```
+
+## Локальный запуск
+Windows (BAT-скрипты)
+
+```
+# Установка зависимостей
+scripts\setup.bat
+
+# Запуск сервера
+scripts\run.bat
+
+# Проверка качества кода
+scripts\check.bat
+
+# Форматирование кода
+scripts\format.bat
+```
+
+## Linux/macOS (Makefile)
+
+```
+# Установка зависимостей
+make setup
+
+# Запуск сервера
+make run
+
+# Проверка качества кода
+make check
+
+# Форматирование кода
+make format
+
+# Запуск через Docker
+make docker-up
+
+# Остановка Docker
+make docker-down
+
+# Просмотр логов
+make logs
+```
+
+## Ручной запуск
+
+```
+# Создание виртуального окружения
 python -m venv venv
-venv\Scripts\activate
-```
 
-### Создайте виртуальное окружение (рекомендуется):
-```
-# Linux/macOS
-python3 -m venv venv
+# Активация (Windows)
+venv\Scripts\activate
+# Активация (Linux/macOS)
 source venv/bin/activate
 
-```
-### Установите зависимости:
-```
-pip install -r requirements.txt
-```
-
-### Запустите сервер:
-```
+# Установка зависимостей
 cd backend
+pip install -r requirements.txt
+
+# Запуск сервера
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Инструменты качества кода
+
+| Инструмент | Назначение | Команда |
+|------------|------------|---------|
+| **Ruff** | Линтер (проверка кода) | `ruff check .` |
+| **Black** | Форматтер (стиль кода) | `black .` |
+| **Pytest** | Тестирование | `pytest tests/ -v` |
+
+
+Запуск всех проверок одной командой:
+```
+make check  # или scripts\check.bat
+```
+
+## Команды Makefile
+
+| Команда | Описание |
+|---------|----------|
+| `make setup` | Установка зависимостей |
+| `make run` | Локальный запуск |
+| `make check` | Линтер + тесты |
+| `make format` | Форматирование кода |
+| `make docker-up` | Запуск Docker контейнеров |
+| `make docker-down` | Остановка контейнеров |
+| `make logs` | Просмотр логов |
+
+## Переменные окружения
+Создайте файл .env (на основе .env.example):
+
+```
+APP_ENV=development
+APP_HOST=0.0.0.0
+APP_PORT=8000
+```
+## Дополнительная информация
+
+- Swagger UI: http://localhost:8000/docs
+
+- ReDoc: http://localhost:8000/redoc
+
+- Frontend: http://localhost
+
+
+
+
+## Запуск сервера в режиме разработки
 uvicorn app.main:app --reload --port 8000
-```
 
-### Откройте в браузере:
-```
-http://localhost:8000
-```
-
-## Справка по командам
-
-```
-# Запуск сервера в режиме разработки
-uvicorn app.main:app --reload --port 8000
-
-# Запуск в PRODUCTION режиме
+## Запуск в PRODUCTION режиме
 set APP_ENV=production && uvicorn app.main:app --reload --port 8000
 
-# Запуск в DEBUG режиме (отключена проверка токенов)
+## Запуск в DEBUG режиме (отключена проверка токенов)
 set APP_ENV=debug && uvicorn app.main:app --reload --port 8000
 
-# Запуск в TEST режиме (заглушка для SMS)
+## Запуск в TEST режиме (заглушка для SMS)
 set APP_ENV=test && uvicorn app.main:app --reload --port 8000
 
-# Проверка качества кода Ruff
+## Проверка качества кода Ruff
 ruff check .
 
-# Авто-исправление Ruff
+## Авто-исправление Ruff
 ruff check . --fix
 
-# Форматирование кода Black
+## Форматирование кода Black
 black .
 
-# Проверка форматирования Black
+## Проверка форматирования Black
 black --check .
 
-# Запуск модульных тестов
+## Запуск модульных тестов
 pytest tests/ -v
 
-# Запуск интеграционных тестов
+## Запуск интеграционных тестов
 pytest tests/test_integration.py -v -s
 
-# Открыть Swagger документацию
-# http://localhost:8000/docs
-```
 
 ## Примеры вывода
 

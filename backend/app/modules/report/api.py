@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException
+
 from ...core.dependencies import get_current_user
 from ..user.models import UserRole
 from .service import ReportService

@@ -4,7 +4,10 @@ from .models import OrderStatus
 class StatusMachine:
     _transitions = {
         OrderStatus.ACCEPTED: [OrderStatus.DIAGNOSTICS],
-        OrderStatus.DIAGNOSTICS: [OrderStatus.WAITING_APPROVAL, OrderStatus.IN_PROGRESS],
+        OrderStatus.DIAGNOSTICS: [
+            OrderStatus.WAITING_APPROVAL,
+            OrderStatus.IN_PROGRESS,
+        ],
         OrderStatus.WAITING_APPROVAL: [OrderStatus.IN_PROGRESS],
         OrderStatus.IN_PROGRESS: [OrderStatus.READY],
         OrderStatus.READY: [OrderStatus.COMPLETED],

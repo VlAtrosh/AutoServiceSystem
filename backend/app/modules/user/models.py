@@ -9,7 +9,15 @@ class UserRole(str, Enum):
 
 
 class User:
-    def __init__(self, id: str, name: str, phone: str, email: str, role: UserRole, password_hash: str):
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        phone: str,
+        email: str,
+        role: UserRole,
+        password_hash: str,
+    ):
         self.id = id
         self.name = name
         self.phone = phone

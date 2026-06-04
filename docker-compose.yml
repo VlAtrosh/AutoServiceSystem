@@ -3,23 +3,20 @@ version: '3.8'
 services:
   backend:
     build: ./backend
-    container_name: autoservice-backend
+    container_name: autoservice-backend-prod
+    env_file:
+      - .env.production
     ports:
       - "8000:8000"
-    environment:
-      - APP_ENV=production
-      - SECRET_KEY=your-secret-key-here
-    volumes:
-      - ./backend:/app
     restart: unless-stopped
 
   frontend:
     image: nginx:alpine
-    container_name: autoservice-frontend
+    container_name: autoservice-frontend-prod
     ports:
       - "80:80"
     volumes:
-      - ./frontend/web:/usr/share/nginx/html
+      - ./frontend/web:/usr/share/nginx/html:ro
+    restart: unless-stopped
     depends_on:
       - backend
-    restart: unless-stopped

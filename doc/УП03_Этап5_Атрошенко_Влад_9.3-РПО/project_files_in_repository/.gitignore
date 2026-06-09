@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.log
+.vscode/
+.idea/
+backend/data/
+screenshots/
+doc/*.rar

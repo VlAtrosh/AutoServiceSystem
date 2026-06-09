@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, stage-*, feature/*, bugfix/* ]
+  pull_request:
+    branches: [ main, stage-* ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      
+      - name: Check Python syntax
+        run: |
+          cd backend
+          python -m py_compile app/api/v1/endpoints/orders.py
+          python -m py_compile app/schemas/order.py
+          python -m py_compile app/main.py
+          echo "✅ Python syntax check passed"
+      
+      - name: Check Docker Compose
+        run: |
+          docker compose -f docker-compose.prod.yml config
+          echo "✅ Docker Compose syntax OK"

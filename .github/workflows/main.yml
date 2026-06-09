@@ -19,6 +19,13 @@ jobs:
         with:
           python-version: '3.12'
       
+      - name: Create .env.production
+        run: |
+          echo "APP_ENV=production" > .env.production
+          echo "APP_DEBUG=false" >> .env.production
+          echo "DATABASE_URL=postgresql://postgres:postgres@db:5432/autoservice" >> .env.production
+          echo "SECRET_KEY=ci-test-secret-key" >> .env.production
+      
       - name: Install dependencies
         run: |
           cd backend
@@ -29,6 +36,7 @@ jobs:
           cd backend
           python -m py_compile app/api/v1/endpoints/orders.py
           python -m py_compile app/schemas/order.py
+          python -m py_compile app/main.py
           echo "✅ Python syntax check passed"
       
       - name: Check Docker Compose

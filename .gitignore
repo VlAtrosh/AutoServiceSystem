@@ -2,6 +2,8 @@ venv/
 __pycache__/
 *.pyc
 .env
+.env.local
+.env.*.local
 .DS_Store
 .pytest_cache/
 .ruff_cache/
@@ -12,3 +14,44 @@ __pycache__/
 backend/data/
 screenshots/
 doc/*.rar
+
+# Секреты и ключи
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+credentials/
+
+# Базы данных
+*.db
+*.sqlite
+*.sql
+*.dump
+backups/
+*.backup
+
+# Логи
+logs/
+*.log
+backend/logs/
+*.log.*
+
+# Временные файлы
+*.tmp
+*.temp
+*.cache
+dist/
+build/
+*.egg-info/
+
+# Docker
+*.pid
+docker-compose.override.yml
+.env.production.local
+
+# Тесты и отчёты
+*.coverage
+htmlcov/
+.tox/
+.coverage.*

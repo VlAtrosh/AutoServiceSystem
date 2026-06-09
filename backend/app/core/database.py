@@ -1,45 +1,13 @@
-from ..modules.order.models import Order, OrderStatus
-from ..modules.user.models import User, UserRole
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
+from app.core.config import settings
 
+DATABASE_URL = f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}/{settings.POSTGRES_DB}"
 
-class Database:
-    def __init__(self):
-        print(f"[DB INIT] Database instance id: {id(self)}")
-        self.users: dict = {}
-        self.orders: dict = {}
-        self.tokens: dict = {}
-        self._init_test_data()
+engine = create_async_engine(DATABASE_URL, echo=True)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
 
-    def _init_test_data(self):
-        test_user = User(
-            id="client1",
-            name="Тест Клиент",
-            phone="+79123456789",
-            email="test@mail.ru",
-            role=UserRole.CLIENT,
-            password_hash="202cb962ac59075b964b07152d234b70",
-        )
-        self.users["client1"] = test_user
-
-        test_order = Order(
-            id="order1",
-            number="ЗН-001",
-            client_id="client1",
-            car_info="Toyota Camry 2020",
-        )
-        test_order.status = OrderStatus.COMPLETED
-        test_order.total = 15000
-        self.orders["order1"] = test_order
-
-        test_mechanic = User(
-            id="mechanic1",
-            name="Тест Механик",
-            phone="+79123456788",
-            email="mechanic@mail.ru",
-            role=UserRole.MECHANIC,
-            password_hash="202cb962ac59075b964b07152d234b70",
-        )
-        self.users["mechanic1"] = test_mechanic
-
-
-db = Database()
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

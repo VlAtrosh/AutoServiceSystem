@@ -8,7 +8,7 @@ class Car(Base):
     __tablename__ = "cars"
     
     id = Column(String, primary_key=True)
-    client_id = Column(String, ForeignKey("users.id"), nullable=False)
+    client_id = Column(String, ForeignKey("users.id"), nullable=True)
     brand = Column(String, nullable=False)
     model = Column(String, nullable=False)
     year = Column(Integer, nullable=True)

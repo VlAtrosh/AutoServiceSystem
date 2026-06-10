@@ -19,6 +19,7 @@ from app.schemas.order import OrderStatusResponse
 
 
 
+
 router = APIRouter(prefix="/orders", tags=["Заказы"])
 
 
@@ -226,3 +227,26 @@ async def update_order_status(
         )
     
     return order
+
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order(
+    order_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if current_user.role != UserRole.DIRECTOR:
+        raise HTTPException(status_code=403, detail="Not enough rights")
+    
+    order_repo = OrderRepository(db)
+    order = await order_repo.get_by_id(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Удаляем связанные работы через репозиторий
+    from app.repositories.order_item_repository import OrderItemRepository
+    item_repo = OrderItemRepository(db)
+    await item_repo.delete_by_order_id(order_id)
+    
+    await order_repo.delete(order_id)
+    return None
+

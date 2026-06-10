@@ -8,6 +8,7 @@ from app.api.v1.endpoints import works_router, parts_router
 from app.api.v1.endpoints.cars import router as cars_router
 from app.api.v1.endpoints.mechanics import router as mechanics_router
 from app.api.v1.endpoints.reports import router as reports_router
+from app.api.v1.endpoints.appointments import router as appointments_router
 
 from app.core.config import settings
 from app.api.v1.endpoints import auth_router, clients_router, orders_router
@@ -38,6 +39,7 @@ app.include_router(parts_router, prefix=settings.API_V1_STR)
 app.include_router(cars_router, prefix=settings.API_V1_STR)
 app.include_router(mechanics_router, prefix=settings.API_V1_STR)
 app.include_router(reports_router, prefix=settings.API_V1_STR)
+app.include_router(appointments_router, prefix=settings.API_V1_STR, tags=["Запись на ремонт"])
 
 # ========== ФРОНТЕНД ==========
 FRONTEND_WEB = Path("/app/frontend/web")

@@ -8,6 +8,7 @@ from app.models.user import User, UserRole
 from app.models.car import Car
 from app.schemas.car import CarCreate, CarUpdate, CarResponse
 from app.repositories.car_repository import CarRepository
+from app.repositories.user_repository import UserRepository
 
 router = APIRouter(prefix="/cars", tags=["Автомобили"])
 
@@ -20,7 +21,26 @@ async def get_user_cars(
     limit: int = 100
 ):
     repo = CarRepository(db)
-    return await repo.get_by_client_id(current_user.id, skip, limit)
+    user_repo = UserRepository(db)
+    cars = await repo.get_by_client_id(current_user.id, skip, limit)
+    
+    result = []
+    for car in cars:
+        owner = await user_repo.get_by_id(car.client_id) if car.client_id else None
+        result.append({
+            "id": car.id,
+            "client_id": car.client_id,
+            "brand": car.brand,
+            "model": car.model,
+            "year": car.year,
+            "license_plate": car.license_plate,
+            "vin": car.vin,
+            "color": car.color,
+            "owner_name": owner.username if owner else None,
+            "created_at": car.created_at,
+            "updated_at": car.updated_at
+        })
+    return result
 
 
 @router.get("/all", response_model=List[CarResponse])
@@ -36,7 +56,26 @@ async def get_all_cars(
             detail="Not enough permissions"
         )
     repo = CarRepository(db)
-    return await repo.get_all(skip, limit)
+    user_repo = UserRepository(db)
+    cars = await repo.get_all(skip, limit)
+    
+    result = []
+    for car in cars:
+        owner = await user_repo.get_by_id(car.client_id) if car.client_id else None
+        result.append({
+            "id": car.id,
+            "client_id": car.client_id,
+            "brand": car.brand,
+            "model": car.model,
+            "year": car.year,
+            "license_plate": car.license_plate,
+            "vin": car.vin,
+            "color": car.color,
+            "owner_name": owner.username if owner else None,
+            "created_at": car.created_at,
+            "updated_at": car.updated_at
+        })
+    return result
 
 
 @router.get("/{car_id}", response_model=CarResponse)
@@ -77,7 +116,7 @@ async def create_car(
     
     car = Car(
         id=str(uuid.uuid4()),
-        client_id=current_user.id,
+        client_id=None,
         brand=car_data.brand,
         model=car_data.model,
         year=car_data.year,
@@ -98,10 +137,16 @@ async def update_car(
     repo = CarRepository(db)
     car = await repo.get_by_id(car_id)
     if not car:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Car not found"
-        )
+        raise HTTPException(status_code=404, detail="Car not found")
+    
+    # Если пытаются привязать автомобиль к другому клиенту
+    if car_data.client_id is not None and car.client_id is not None:
+        if car.client_id != car_data.client_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Этот автомобиль уже принадлежит другому клиенту. Перепривязка запрещена."
+            )
+    
     if car.client_id != current_user.id and current_user.role not in [UserRole.DIRECTOR, UserRole.RECEIVER]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

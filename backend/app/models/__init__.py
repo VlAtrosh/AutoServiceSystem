@@ -9,3 +9,4 @@ from .payment import Payment, PaymentStatus, PaymentMethod
 from .work import Work
 from .part import Part
 from .order_item import OrderItem
+from .appointment import Appointment

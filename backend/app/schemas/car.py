@@ -44,9 +44,10 @@ class CarUpdate(BaseModel):
 
 class CarResponse(CarBase):
     id: str
-    client_id: str
+    owner_name: Optional[str] = None  
     created_at: datetime
     updated_at: Optional[datetime] = None
+    client_id: Optional[str] = None
 
     class Config:
         from_attributes = True

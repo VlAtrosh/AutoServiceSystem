@@ -14,64 +14,55 @@
         <!-- Боковое меню -->
         <aside class="sidebar">
             <div class="logo">
-                <span class="logo-icon">🚗</span>
+                <div class="logo-icon">⚙️</div>
                 <h1>АвтоСервис</h1>
             </div>
+
             <nav class="nav-menu">
-                <!-- Пункт CRM в самом верху -->
                 <a href="#" class="nav-item" data-page="crm">
-                    <span class="icon">📊</span>
                     <span class="nav-text">CRM</span>
                 </a>
-                
-                <!-- Пункт СЕРВИС с выпадающим подменю -->
+
                 <div class="nav-item has-submenu">
-                    <span class="icon">🔧</span>
                     <span class="nav-text">Сервис</span>
                     <span class="submenu-arrow">▼</span>
                     <div class="submenu">
-                        <a href="#" class="submenu-item" data-page="orders">📋 Заказ-наряды</a>
-                        <a href="#" class="submenu-item" data-page="appointment">📅 Запись на ремонт</a>
+                        <a href="#" class="submenu-item" data-page="orders">Заказ-наряды</a>
+                        <a href="#" class="submenu-item" data-page="appointment">Запись на ремонт</a>
                     </div>
                 </div>
-                
+
                 <a href="#" class="nav-item" data-page="cars">
-                    <span class="icon">🚙</span>
                     <span class="nav-text">Автомобили</span>
                 </a>
-                
+
                 <a href="#" class="nav-item" data-page="reports">
-                    <span class="icon">📊</span>
                     <span class="nav-text">Отчёты</span>
                 </a>
-                
-                <!-- Пункт СПРАВОЧНИКИ с выпадающим подменю -->
+
                 <div class="nav-item has-submenu">
-                    <span class="icon">📚</span>
                     <span class="nav-text">Справочники</span>
                     <span class="submenu-arrow">▼</span>
                     <div class="submenu">
-                        <a href="#" class="submenu-item" data-page="clients">👥 Клиенты</a>
-                        <a href="#" class="submenu-item" data-page="workers">🔧 Исполнители</a>
-                        <a href="#" class="submenu-item" data-page="works-ref">⚙️ Работы</a>
-                        <a href="#" class="submenu-item" data-page="parts-ref">🔩 Запчасти</a>
+                        <a href="#" class="submenu-item" data-page="clients">Клиенты</a>
+                        <a href="#" class="submenu-item" data-page="workers">Исполнители</a>
+                        <a href="#" class="submenu-item" data-page="works-ref">Работы</a>
                     </div>
                 </div>
             </nav>
 
-            <!-- Блок пользователя с выпадающим меню -->
             <div class="user-section">
                 <div class="user-card" id="user-profile-btn">
-                    <div class="user-avatar">👤</div>
+                    <div class="user-avatar" id="user-avatar">👤</div>
                     <div class="user-info">
                         <div id="user-name" class="user-name">Пользователь</div>
                         <div id="user-role" class="user-role"></div>
-                        <div class="user-id"><span style="opacity: 0.7;">ID:</span> <span id="user-id"></span></div>
+                        <div class="user-id">ID: <span id="user-id"></span></div>
                     </div>
                 </div>
                 <div class="user-dropdown" id="user-dropdown">
-                    <div class="dropdown-item" id="dropdown-profile">👤 Профиль</div>
-                    <div class="dropdown-item" id="dropdown-logout">🚪 Выход</div>
+                    <div class="dropdown-item" id="dropdown-profile">Профиль</div>
+                    <div class="dropdown-item" id="dropdown-logout">Выход</div>
                 </div>
             </div>
         </aside>
@@ -81,7 +72,7 @@
             <header class="top-bar">
                 <h2 id="page-title">Заказ-наряды</h2>
                 <div class="search-container">
-                    <input type="text" id="global-search" placeholder="Поиск...">
+                    <input type="text" id="global-search" placeholder="Поиск по заказу, авто или клиенту...">
                 </div>
                 <button id="create-order-btn" class="btn btn-primary">+ Новый заказ</button>
             </header>
@@ -90,17 +81,16 @@
     </div>
 
     <!-- Модальное окно авторизации -->
-    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 24px; width: 360px; padding: 32px; text-align: center;">
-        <h3 style="margin-bottom: 16px;">Вход в систему</h3>
-        <p style="margin-bottom: 20px; color: #64748b;">test@mail.ru / 123</p>
-        <input type="email" id="login-email" placeholder="Логин" value="client1" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <input type="password" id="login-password" placeholder="Пароль" value="123" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <!-- ДОБАВЬ onclick СЮДА -->
-        <button id="do-login" onclick="manualLogin()" style="width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 12px; cursor: pointer;">Войти</button>
-        <div id="login-error" style="color: red; margin-top: 12px;"></div>
+    <div id="login-modal" class="login-modal">
+        <div class="login-modal-content">
+            <h3>Вход в систему</h3>
+            <p class="login-hint">test@mail.ru / 123</p>
+            <input type="text" id="login-email" placeholder="Логин или email" value="client1">
+            <input type="password" id="login-password" placeholder="Пароль" value="123">
+            <button id="do-login" onclick="manualLogin()">Войти</button>
+            <div id="login-error"></div>
+        </div>
     </div>
-</div>
 
     <script src="/js/app.js"></script>
 </body>
